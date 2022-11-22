@@ -78,19 +78,76 @@
         class Markdown {
             static convertToHtml() {
                 $("#convert-to-html").prop("disabled", true);
+                this.renderConvertedTextarea("");
+                this.renderHtml("");
                 let markdown = $.trim(
                     $("#markdown-source").val()
                 );
+                if (markdown === "") {
+
+                }
 
                 let jqxhr = $.post( "/api/convert-to-html", { "markdown": markdown })
-                    .done(function( data ) {
-                        console.log( data.name );
-                        console.log( data.time );
+                    .done(function(data) {
+                        if (!data.success) {
+                            Markdown.exception(data.error);
+                            return;
+                        }
+
+                        Markdown.renderAll(data.converted_html);
                     });
 
                 jqxhr.always(function() {
                     $("#convert-to-html").prop("disabled", false);
+
+                    if (jqxhr.status >= 400) {
+                        // note that this is being called via the Markdown class instead of "this"
+                        // since "this" won't be available here within the callback function
+                        Markdown.exception(jqxhr.status + " (" + jqxhr.statusText + ")");
+                    }
                 });
+            }
+
+            static renderConvertedTextarea(html) {
+                if (typeof html !== "string") {
+                    html = "";
+                }
+                html = $.trim(html);
+                $("#converted-to-html").val(
+                    FunWithText.cleanString(html)
+                );
+            }
+
+            static renderHtml(html) {
+                $("#rendered-html").html(
+                    FunWithText.cleanString(html)
+                );
+            }
+
+            static renderAll(html) {
+                this.renderConvertedTextarea(
+                    FunWithText.cleanString(html)
+                );
+                this.renderHtml(
+                    FunWithText.cleanString(html)
+                );
+            }
+
+            static exception(message) {
+                this.renderConvertedTextarea(
+                    FunWithText.cleanString(message)
+                );
+                this.renderHtml("");
+            }
+        }
+
+        class FunWithText {
+            static cleanString(string) {
+                if (typeof string !== "string") {
+                    return "";
+                }
+
+                return $.trim(string);
             }
         }
     </script>
