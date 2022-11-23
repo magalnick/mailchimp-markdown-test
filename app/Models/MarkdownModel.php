@@ -47,18 +47,27 @@ class MarkdownModel
         // doing this as a for loop instead of a foreach loop so that a previous or next line can be compared
         // specifically for a multi-line <p> tag
         $size = count($this->lines);
+        $previous_line_is_p_tag = false;
         for ($i = 0; $i < $size; $i++) {
             $line = $this->lines[$i];
 
+            $next_line_is_p_tag = false;
+            if ($i + 1 < $size && $this->isLineUnformattedText($this->lines[$i+1])) {
+                $next_line_is_p_tag = true;
+            }
+
             switch (true) {
-                case $line === '':
-                    // nothing to do on an empty line
+                case $this->isLineUnformattedText($line):
+                    $line = $this->convertToPTag($line, $previous_line_is_p_tag, $next_line_is_p_tag);
+                    $previous_line_is_p_tag = true;
                     break;
-                case substr($line, 0, 1) === '#':
+                case $this->isLineAHeader($line):
                     $line = $this->convertToHeader($line);
+                    $previous_line_is_p_tag = false;
                     break;
+                case $this->isLineBlank($line):
                 default:
-                    // do the p tag
+                    $previous_line_is_p_tag = false;
             }
 
             $this->lines[$i] = $this->convertTheLinks($line);
@@ -73,6 +82,37 @@ class MarkdownModel
     protected function validate(): MarkdownModel
     {
         return $this;
+    }
+
+    /**
+     * @param string $line
+     * @return bool
+     */
+    public function isLineBlank(string $line): bool
+    {
+        return $line === '';
+    }
+
+    /**
+     * @param string $line
+     * @return bool
+     */
+    public function isLineAHeader(string $line): bool
+    {
+        return substr($line, 0, 1) === '#';
+    }
+
+    /**
+     * @param string $line
+     * @return bool
+     */
+    public function isLineUnformattedText(string $line): bool
+    {
+        if ($this->isLineBlank($line) || $this->isLineAHeader($line)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -94,6 +134,23 @@ class MarkdownModel
         $line = trim($line);
 
         return "<h$h_count>$line</h$h_count>";
+    }
+
+    /**
+     * @param string $line
+     * @param bool $previous_line_is_p_tag
+     * @param bool $next_line_is_p_tag
+     * @return string
+     */
+    public function convertToPTag(string $line, bool $previous_line_is_p_tag, bool $next_line_is_p_tag): string
+    {
+        if (!$previous_line_is_p_tag) {
+            $line = "<p>$line";
+        }
+        if (!$next_line_is_p_tag) {
+            $line .= '</p>';
+        }
+        return $line;
     }
 
     /**

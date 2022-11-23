@@ -122,4 +122,64 @@ class MarkdownModelTest extends TestCase
         $this->expectException(Exception::class);
         MarkdownModel::factory($markdown)->convertToHeader($markdown);
     }
+
+    /**
+     * Test the convert to HTML function for un-formatted text on its own
+     *
+     * @test
+     * @return void
+     */
+    public function testConvertToPTag_standalone(): void
+    {
+        $this->setUpFaker();
+        $markdown = $this->faker->sha256;
+        $expected = "<p>$markdown</p>";
+        $actual   = MarkdownModel::factory($markdown)->convertToPTag($markdown, false, false);
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test the convert to HTML function for un-formatted text as the first of multiple lines
+     *
+     * @test
+     * @return void
+     */
+    public function testConvertToPTag_firstLine(): void
+    {
+        $this->setUpFaker();
+        $markdown = $this->faker->sha256;
+        $expected = "<p>$markdown";
+        $actual   = MarkdownModel::factory($markdown)->convertToPTag($markdown, false, true);
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test the convert to HTML function for un-formatted text nestled between other lines
+     *
+     * @test
+     * @return void
+     */
+    public function testConvertToPTag_middleLine(): void
+    {
+        $this->setUpFaker();
+        $markdown = $this->faker->sha256;
+        $expected = "$markdown";
+        $actual   = MarkdownModel::factory($markdown)->convertToPTag($markdown, true, true);
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test the convert to HTML function for un-formatted text as the last of multiple lines
+     *
+     * @test
+     * @return void
+     */
+    public function testConvertToPTag_lastLine(): void
+    {
+        $this->setUpFaker();
+        $markdown = $this->faker->sha256;
+        $expected = "$markdown</p>";
+        $actual   = MarkdownModel::factory($markdown)->convertToPTag($markdown, true, false);
+        $this->assertEquals($expected, $actual);
+    }
 }
