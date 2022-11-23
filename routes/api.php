@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::post('convert-to-html', [
+    App\Http\Controllers\ConvertToHtmlController::class,
+    'convert',
+    'as' => 'convert-to-html',
+]);
