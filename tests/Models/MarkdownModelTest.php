@@ -255,4 +255,18 @@ class MarkdownModelTest extends TestCase
         $actual   = MarkdownModel::factory()->convertTheLinks($markdown);
         $this->assertEquals($expected, $actual);
     }
+
+    /**
+     * Test the function to convert multiple links on a line works as intended
+     *
+     * @test
+     * @return void
+     */
+    public function testConvertTheLinks_multipleLinks(): void
+    {
+        $markdown = 'Here\'s [link 1](https://www.google.com/), and here\'s [link 2](https://www.mailchimp.com/). Woohoo!';
+        $expected = 'Here\'s <a href="https://www.google.com/">link 1</a>, and here\'s <a href="https://www.mailchimp.com/">link 2</a>. Woohoo!';
+        $actual   = MarkdownModel::factory()->convertTheLinks($markdown);
+        $this->assertEquals($expected, $actual);
+    }
 }

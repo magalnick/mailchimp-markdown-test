@@ -203,7 +203,7 @@ class MarkdownModel
     public function convertTheLinks(string $line): string
     {
         return preg_replace(
-            '/\[(.+)]\((https?:\/\/.+)\)/',
+            '/\[([^]]+)]\((https?:\/\/[^)]+)\)/',
             '<a href="$2">$1</a>',
             $line
         );
