@@ -23,7 +23,10 @@ class ConvertToHtmlController extends Controller
                 throw new Exception("No markdown provided to convert to HTML!", 400);
             }
 
-            $converted_html = MarkdownModel::factory($markdown)->convertToHtml();
+            $converted_html = MarkdownModel::factory()
+                ->setMarkdown($markdown)
+                ->convertToHtml()
+            ;
 
             return Response::success(['converted_html' => $converted_html]);
         } catch (Exception $e) {

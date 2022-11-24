@@ -4,26 +4,27 @@ namespace App\Models;
 
 use Exception;
 
+// TODO - README
+
 class MarkdownModel
 {
-    protected string $markdown;
+    protected string $markdown = '';
     protected array $lines = [];
 
     /**
-     * @param string $markdown
-     * @return mixed
+     * @return MarkdownModel
      */
-    public static function factory(string $markdown): MarkdownModel
+    public static function factory(): MarkdownModel
     {
         $class = get_called_class();
-        return new $class($markdown);
+        return new $class();
     }
 
     /**
-     * MarkdownModel constructor.
      * @param string $markdown
+     * @return $this
      */
-    protected function __construct(string $markdown)
+    public function setMarkdown(string $markdown)
     {
         $this->markdown = trim($markdown);
 
@@ -37,13 +38,20 @@ class MarkdownModel
         foreach ($lines as $line) {
             $this->lines[] = trim($line);
         }
+
+        return $this;
     }
 
     /**
      * @return string
+     * @throws Exception
      */
     public function convertToHtml(): string
     {
+        if ($this->markdown === '' || empty($this->lines)) {
+            throw new Exception('Markdown text has not yet been set', 400);
+        }
+
         // doing this as a for loop instead of a foreach loop so that a previous or next line can be compared
         // specifically for a multi-line <p> tag
         $size = count($this->lines);
@@ -58,11 +66,17 @@ class MarkdownModel
 
             switch (true) {
                 case $this->isLineUnformattedText($line):
-                    $line = $this->convertToPTag($line, $previous_line_is_p_tag, $next_line_is_p_tag);
+                    $line = $this->convertToPTag(
+                        $this->scrubDisallowedHtmlFromLine($line),
+                        $previous_line_is_p_tag,
+                        $next_line_is_p_tag
+                    );
                     $previous_line_is_p_tag = true;
                     break;
                 case $this->isLineAHeader($line):
-                    $line = $this->convertToHeader($line);
+                    $line = $this->convertToHeader(
+                        $this->scrubDisallowedHtmlFromLine($line)
+                    );
                     $previous_line_is_p_tag = false;
                     break;
                 case $this->isLineBlank($line):
@@ -77,11 +91,39 @@ class MarkdownModel
     }
 
     /**
-     * @return $this
+     * This function is a little security measure to help prevent certain tags from executing on the page
+     * when the converted HTML is rendered, just in case the user puts actual HTML into the input box.
+     *
+     * @param string $line
+     * @return string
+     * @throws Exception
      */
-    protected function validate(): MarkdownModel
+    public function scrubDisallowedHtmlFromLine(string $line): string
     {
-        return $this;
+        $replace_tags = [
+            '<html'      => '&lt;html',
+            '</html'     => '&lt;/html',
+            '<head'      => '&lt;head',
+            '</head'     => '&lt;/head',
+            '<body'      => '&lt;body',
+            '</body'     => '&lt;/body',
+            '<main'      => '&lt;main',
+            '</main'     => '&lt;/main',
+            '<script'    => '&lt;script',
+            '<form'      => '&lt;form',
+            '<input'     => '&lt;input',
+            '<button'    => '&lt;button',
+            '<textarea'  => '&lt;textarea',
+            '</textarea' => '&lt;/textarea',
+            '<div'       => '&lt;div',
+            '</div'      => '&lt;/div',
+        ];
+
+        return str_replace(
+            array_keys($replace_tags),
+            array_values($replace_tags),
+            $line
+        );
     }
 
     /**
@@ -160,6 +202,10 @@ class MarkdownModel
      */
     public function convertTheLinks(string $line): string
     {
-        return $line;
+        return preg_replace(
+            '/\[(.+)]\((https?:\/\/.+)\)/',
+            '<a href="$2">$1</a>',
+            $line
+        );
     }
 }

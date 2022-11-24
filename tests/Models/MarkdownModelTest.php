@@ -23,7 +23,7 @@ class MarkdownModelTest extends TestCase
         $faker    = $this->faker->sha256;
         $markdown = "# $faker";
         $expected = "<h1>$faker</h1>";
-        $actual   = MarkdownModel::factory($markdown)->convertToHeader($markdown);
+        $actual   = MarkdownModel::factory()->convertToHeader($markdown);
         $this->assertEquals($expected, $actual);
     }
 
@@ -39,7 +39,7 @@ class MarkdownModelTest extends TestCase
         $faker    = $this->faker->sha256;
         $markdown = "## $faker";
         $expected = "<h2>$faker</h2>";
-        $actual   = MarkdownModel::factory($markdown)->convertToHeader($markdown);
+        $actual   = MarkdownModel::factory()->convertToHeader($markdown);
         $this->assertEquals($expected, $actual);
     }
 
@@ -55,7 +55,7 @@ class MarkdownModelTest extends TestCase
         $faker    = $this->faker->sha256;
         $markdown = "### $faker";
         $expected = "<h3>$faker</h3>";
-        $actual   = MarkdownModel::factory($markdown)->convertToHeader($markdown);
+        $actual   = MarkdownModel::factory()->convertToHeader($markdown);
         $this->assertEquals($expected, $actual);
     }
 
@@ -71,7 +71,7 @@ class MarkdownModelTest extends TestCase
         $faker    = $this->faker->sha256;
         $markdown = "#### $faker";
         $expected = "<h4>$faker</h4>";
-        $actual   = MarkdownModel::factory($markdown)->convertToHeader($markdown);
+        $actual   = MarkdownModel::factory()->convertToHeader($markdown);
         $this->assertEquals($expected, $actual);
     }
 
@@ -87,7 +87,7 @@ class MarkdownModelTest extends TestCase
         $faker    = $this->faker->sha256;
         $markdown = "##### $faker";
         $expected = "<h5>$faker</h5>";
-        $actual   = MarkdownModel::factory($markdown)->convertToHeader($markdown);
+        $actual   = MarkdownModel::factory()->convertToHeader($markdown);
         $this->assertEquals($expected, $actual);
     }
 
@@ -103,7 +103,7 @@ class MarkdownModelTest extends TestCase
         $faker    = $this->faker->sha256;
         $markdown = "###### $faker";
         $expected = "<h6>$faker</h6>";
-        $actual   = MarkdownModel::factory($markdown)->convertToHeader($markdown);
+        $actual   = MarkdownModel::factory()->convertToHeader($markdown);
         $this->assertEquals($expected, $actual);
     }
 
@@ -120,7 +120,7 @@ class MarkdownModelTest extends TestCase
         $markdown = "####### $faker";
 
         $this->expectException(Exception::class);
-        MarkdownModel::factory($markdown)->convertToHeader($markdown);
+        MarkdownModel::factory()->convertToHeader($markdown);
     }
 
     /**
@@ -134,7 +134,7 @@ class MarkdownModelTest extends TestCase
         $this->setUpFaker();
         $markdown = $this->faker->sha256;
         $expected = "<p>$markdown</p>";
-        $actual   = MarkdownModel::factory($markdown)->convertToPTag($markdown, false, false);
+        $actual   = MarkdownModel::factory()->convertToPTag($markdown, false, false);
         $this->assertEquals($expected, $actual);
     }
 
@@ -149,7 +149,7 @@ class MarkdownModelTest extends TestCase
         $this->setUpFaker();
         $markdown = $this->faker->sha256;
         $expected = "<p>$markdown";
-        $actual   = MarkdownModel::factory($markdown)->convertToPTag($markdown, false, true);
+        $actual   = MarkdownModel::factory()->convertToPTag($markdown, false, true);
         $this->assertEquals($expected, $actual);
     }
 
@@ -164,7 +164,7 @@ class MarkdownModelTest extends TestCase
         $this->setUpFaker();
         $markdown = $this->faker->sha256;
         $expected = "$markdown";
-        $actual   = MarkdownModel::factory($markdown)->convertToPTag($markdown, true, true);
+        $actual   = MarkdownModel::factory()->convertToPTag($markdown, true, true);
         $this->assertEquals($expected, $actual);
     }
 
@@ -179,7 +179,80 @@ class MarkdownModelTest extends TestCase
         $this->setUpFaker();
         $markdown = $this->faker->sha256;
         $expected = "$markdown</p>";
-        $actual   = MarkdownModel::factory($markdown)->convertToPTag($markdown, true, false);
+        $actual   = MarkdownModel::factory()->convertToPTag($markdown, true, false);
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test the scrub function to validate certain HTML tags are being removed.
+     * Note that this will only test a few of the many that are specified
+     *
+     * @test
+     * @return void
+     */
+    public function testScrubDisallowedHtmlFromLine_clean(): void
+    {
+        $markdown = '<script><button></button></html><a href><div></div>';
+        $expected = '&lt;script>&lt;button></button>&lt;/html><a href>&lt;div>&lt;/div>';
+        $actual   = MarkdownModel::factory()->scrubDisallowedHtmlFromLine($markdown);
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test the scrub function to validate unspecified tags remain intact
+     *
+     * @test
+     * @return void
+     */
+    public function testScrubDisallowedHtmlFromLine_nothingToClean(): void
+    {
+        $this->setUpFaker();
+        $faker    = $this->faker->sha256;
+        $markdown = "<p><a href><strong>$faker</strong></a></p>";
+        $expected = $markdown;
+        $actual   = MarkdownModel::factory()->scrubDisallowedHtmlFromLine($markdown);
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test the function to convert a link works as intended
+     *
+     * @test
+     * @return void
+     */
+    public function testConvertTheLinks_success(): void
+    {
+        $markdown = 'This is [an inline link](https://www.mailchimp.com/). Woohoo!';
+        $expected = 'This is <a href="https://www.mailchimp.com/">an inline link</a>. Woohoo!';
+        $actual   = MarkdownModel::factory()->convertTheLinks($markdown);
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test the function to convert a link doesn't work if the markdown isn't formatter properly
+     *
+     * @test
+     * @return void
+     */
+    public function testConvertTheLinks_failure(): void
+    {
+        $markdown = 'This is [an inline link] (https://www.mailchimp.com/). Woohoo!';
+        $expected = $markdown;
+        $actual   = MarkdownModel::factory()->convertTheLinks($markdown);
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test the function to convert a link doesn't do anything if there is no markdown that looks like a link
+     *
+     * @test
+     * @return void
+     */
+    public function testConvertTheLinks_nothingToDo(): void
+    {
+        $markdown = 'There is no link to convert.';
+        $expected = $markdown;
+        $actual   = MarkdownModel::factory()->convertTheLinks($markdown);
         $this->assertEquals($expected, $actual);
     }
 }
