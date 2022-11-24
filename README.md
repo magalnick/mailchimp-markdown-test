@@ -1,5 +1,3 @@
-<p style="text-align: center"><img alt="Mailchimp Markdown Test" style="width: 56px; height: 56px;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAMAAACfWMssAAAAgVBMVEX/4BsAAAD/4hv/6Bz/5hz/5BsAAAT/6hz02Bu/qhb/7R3bwhmSghKnlRTnzRrt0xvMtRheVQ1rYQ7GsBdQSAx4bA+gjxOtmhVTTAtYUAzSuhiLfRI4MQlMRAs7NwlmWw4cGQUuKwiXiROAcxIWEwS0oxcjIAZBPAopJQj/8x4QDwWAHeyLAAAB8klEQVRIie2V3XKjMAyFbcnCNg42gQAJ+SGBlqR9/wesIaTdq9jdu93JmeHyG0lHx4Kxl176twWESH+Boaq3uxYZCYkoojmiPa/KkuvUrLaHYxZLCpsUCgkdP/FZqzgSc15KYGi3fNFJRnGaW8FANvxba4zpM+eOGEDHi0OmzzOoI/wlyy0xUhdeQpmt+uGN801EQYAk9/XUmb9Xj0ZHBmFQVoP0yz89/JxlwyCZhIDJ4Q9qBX0XblVevQ/U3pFzqUzrUKgk6A3YxG8MD0uHAoAADCQQ6pV6nxEq71wnfVJ93weTiFBysNAE6fEODgi6d0CZuW21eF5TDHVqusWVi3Ttey1QtVBujs/HBJX0vFH5OJONVEbhYA1Res2fk6R4bnetu9dsvTVs+gDfArsExdPKjh/3d+FmN4GkvYaM9ftIFVUfcwIa//QFgtPrje2HwC7JRxwqVUygn69Yb3ZFZiWqU2jIbGQo1RwcwcasNIYhKi2r0NPCFd/Xtwn8JOxyZxmYfQ8yCSYdbX1eIkdQd103NEoIzcNBB7lkbpAg0B9HAuF4E3Ov5BKeRk5z+XW0/BBzdfwZuC45NyQlazueuIgjMJOPwCa3KX4XF/s3AKlvP0egp7h6swjb/Wb8PF8rDfgLbkL9/4a8rb8p99JL/5O+AJZBGRkdtoCeAAAAAElFTkSuQmCC" /></p>
-
 # Mailchimp Markdown Test
 
 ## Applicant
@@ -22,13 +20,36 @@
 - jQuery 3.6.1
 - Bootstrap 5.1.3
 
-## Installation
+## Installation and System Requirements
 
-### From the Attached Zip File
+### Install From the Attached Zip File
 
-### From Github
+- Unzip it and go. The vendor directory is included for your convenience.
+
+### Install From Github
+
+```
+git clone git@github.com:magalnick/mailchimp-markdown-test.git
+cd mailchimp-markdown-test
+composer install
+```
+
+### System Requirements
+
+- If you intend to run this, it should be with PHP 7.4.
+- It may run with PHP 8.0 or 8.1, but they haven't been tested, so no guarantees.
 
 ## Files to Check
+
+```
+routes/api.php
+routes/web.php
+app/Http/Controllers/ConvertToHtmlController.php
+app/Http/Response.php
+app/Models/MarkdownModel.php
+tests/Models/MarkdownModelTest.php
+resources/views/mailchimp.blade.php
+```
 
 ## Special Notes and Known issues
 
@@ -39,3 +60,9 @@
 ## Live Demo
 
 - [Check it out!](https://random-stuff.madmarye.com/)
+
+## Run the Unit Tests
+
+```
+vendor/bin/phpunit tests/Models/MarkdownModelTest.php
+```
