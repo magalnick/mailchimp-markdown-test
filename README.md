@@ -3,6 +3,7 @@
 ## Applicant
 
 - David Magalnick
+- [LinkedIn](https://www.linkedin.com/in/dmagalnick/)
 
 ## Requirements
 
@@ -51,11 +52,12 @@ tests/Models/MarkdownModelTest.php
 resources/views/mailchimp.blade.php
 ```
 
-## Special Notes and Known issues
+## Special Notes
 
 - The server that I used to host this is a 2 year old Ubuntu 20.04 box running PHP 7.4, which limits the Laravel install to 8.x. Thus the slightly older versions of PHP and Laravel.
 - The base Laravel install is mostly untouched. My changes are primarily new files.
 - Since this is a throw together site with 1 page and 1 API call, there's no fancy multi-environment modifications. The `.env` file is committed directly to the git repo, even though that's a big no-no in the real world.
+- Along with unit tests for the different methods, I also manually tested the web page to figure out various scenarios that might break things.
 
 ## Live Demo
 
