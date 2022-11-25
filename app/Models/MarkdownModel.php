@@ -22,7 +22,7 @@ class MarkdownModel
      * @param string $markdown
      * @return $this
      */
-    public function setMarkdown(string $markdown)
+    public function setMarkdown(string $markdown): MarkdownModel
     {
         $this->markdown = trim($markdown);
 
@@ -115,6 +115,7 @@ class MarkdownModel
             '</textarea' => '&lt;/textarea',
             '<div'       => '&lt;div',
             '</div'      => '&lt;/div',
+            '<?'         => '&lt;?',
         ];
 
         return str_replace(
