@@ -4,8 +4,6 @@ namespace App\Models;
 
 use Exception;
 
-// TODO - README
-
 class MarkdownModel
 {
     protected string $markdown = '';
